@@ -1,0 +1,9 @@
+br/uffs/chatmqtt/mqtt/MqttService.class
+br/uffs/chatmqtt/services/UserService.class
+br/uffs/chatmqtt/services/GroupService.class
+br/uffs/chatmqtt/models/ChatSession.class
+br/uffs/chatmqtt/models/User.class
+br/uffs/chatmqtt/services/ChatService.class
+br/uffs/chatmqtt/models/Group.class
+br/uffs/chatmqtt/ui/Main.class
+br/uffs/chatmqtt/ui/ConsoleUI.class
