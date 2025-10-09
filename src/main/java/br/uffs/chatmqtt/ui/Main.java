@@ -1,6 +1,9 @@
 package br.uffs.chatmqtt.ui;
 
 import br.uffs.chatmqtt.mqtt.MqttService;
+import br.uffs.chatmqtt.services.UserService;
+import br.uffs.chatmqtt.services.GroupService;
+import br.uffs.chatmqtt.services.MessageService;
 
 import java.util.Scanner;
 
@@ -8,19 +11,18 @@ public class Main {
     public static void main(String[] args) throws Exception {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Digite seu ID de usuário: ");
-        String userId = scanner.nextLine();
+        String userId = scanner.nextLine().trim();
 
         MqttService mqtt = new MqttService();
         mqtt.connect(userId);
 
-        // Marca como online
-        mqtt.publish("USERS", userId + ":ONLINE");
+        UserService userService = new UserService(userId, mqtt);
+        GroupService groupService = new GroupService(userId, mqtt);
+        MessageService messageService = new MessageService(userId, mqtt);
 
-        System.out.println("Você está online! Pressione ENTER para sair...");
-        scanner.nextLine();
+        userService.goOnline();
 
-        // Ao sair
-        mqtt.publish("USERS", userId + ":OFFLINE");
-        mqtt.disconnect();
+        ConsoleUI console = new ConsoleUI(userService, groupService, messageService, mqtt);
+        console.start();
     }
 }

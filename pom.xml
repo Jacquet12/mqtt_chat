@@ -15,17 +15,19 @@
     </properties>
 
     <dependencies>
-        <!-- Biblioteca MQTT Paho -->
         <dependency>
             <groupId>org.eclipse.paho</groupId>
             <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
             <version>1.2.5</version>
         </dependency>
+        <dependency>
+            <groupId>org.fusesource.jansi</groupId>
+            <artifactId>jansi</artifactId>
+            <version>2.4.0</version>
+        </dependency>
     </dependencies>
-
     <build>
         <plugins>
-            <!-- Plugin para executar classes Java pelo Maven -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
