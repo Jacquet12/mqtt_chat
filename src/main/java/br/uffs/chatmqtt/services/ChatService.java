@@ -19,7 +19,7 @@ public class ChatService {
     private final Map<String, ChatSession> sessions = new HashMap<>();
     private final List<String> pendingRequests = new ArrayList<>();
 
-    public ChatService(String currentUser, MqttService mqtt, ConsoleUI console) throws MqttException {
+    public ChatService(String currentUser, MqttService mqtt, ConsoleUI console) {
         this.currentUser = currentUser;
         this.mqtt = mqtt;
         this.consoleUI = console;
@@ -33,9 +33,7 @@ public class ChatService {
             return;
         }
 
-        String payload =
-                "{\"type\":\"chat_request\",\"from\":\"" + currentUser + "\",\"timestamp\":\"" + LocalDateTime.now() + "\"}";
-
+        String payload = "{\"type\":\"chat_request\",\"from\":\"" + currentUser + "\"}";
         mqtt.publishControlMessage(target, payload);
         System.out.println("Solicitação enviada para " + target);
     }
@@ -46,13 +44,18 @@ public class ChatService {
         if (payload.contains("\"type\":\"chat_request\"")) {
             String from = extract(payload, "from");
             pendingRequests.add(from);
-            System.out.println("Solicitação de conversa recebida de " + from);
+            System.out.println("\n📥 Nova solicitação privada de " + from);
         }
 
         if (payload.contains("\"type\":\"chat_accept\"")) {
-            String id = extract(payload, "chatId");
+            String chatId = extract(payload, "chatId");
             String partner = extract(payload, "from");
-            startChat(id, partner);
+
+            ChatSession session = new ChatSession(chatId, currentUser, partner);
+            sessions.put(chatId, session);
+
+            System.out.println("\n✔ Conversa privada criada com " + partner);
+            System.out.println("➡ Use a opção [12] do menu para conversar.");
         }
     }
 
@@ -67,22 +70,73 @@ public class ChatService {
             String r = scanner.nextLine().trim().toLowerCase();
 
             if (r.equals("s")) {
-
                 String chatId = makeChatId(currentUser, from);
 
-                String payload =
-                        "{\"type\":\"chat_accept\",\"from\":\"" + currentUser + "\",\"chatId\":\"" + chatId + "\"}";
-
+                String payload = "{\"type\":\"chat_accept\",\"from\":\"" + currentUser + "\",\"chatId\":\"" + chatId + "\"}";
                 mqtt.publishControlMessage(from, payload);
 
-                pendingRequests.remove(from);
+                ChatSession session = new ChatSession(chatId, currentUser, from);
+                sessions.put(chatId, session);
 
-                startChat(chatId, from);
+                System.out.println("\n✔ Conversa privada criada com " + from);
+                System.out.println("➡ Use a opção [12] do menu para conversar.");
+
+                pendingRequests.remove(from);
             } else {
                 pendingRequests.remove(from);
                 System.out.println("Recusada.");
             }
         }
+    }
+
+    public void listSessions() {
+        if (sessions.isEmpty()) {
+            System.out.println("Nenhuma conversa privada criada.");
+            return;
+        }
+
+        System.out.println("\nConversas privadas existentes:");
+        for (ChatSession s : sessions.values()) {
+            System.out.println("- " + s.getUserA() + " ↔ " + s.getUserB());
+        }
+    }
+
+    public void openPrivateChat(ConsoleUI consoleUI) throws MqttException {
+        if (sessions.isEmpty()) {
+            System.out.println("Nenhuma conversa privada disponível.");
+            return;
+        }
+
+        System.out.println("\nEscolha uma conversa:");
+        List<ChatSession> list = new ArrayList<>(sessions.values());
+
+        for (int i = 0; i < list.size(); i++) {
+            ChatSession s = list.get(i);
+            String other = s.getUserA().equals(currentUser) ? s.getUserB() : s.getUserA();
+            System.out.println((i + 1) + " - Conversa com " + other);
+        }
+
+        System.out.print("Opção: ");
+        String opt = scanner.nextLine().trim();
+
+        if (!opt.matches("\\d+")) {
+            System.out.println("Opção inválida");
+            return;
+        }
+
+        int idx = Integer.parseInt(opt) - 1;
+        if (idx < 0 || idx >= list.size()) {
+            System.out.println("Opção inválida");
+            return;
+        }
+
+        ChatSession session = list.get(idx);
+        String chatId = session.getChatId();
+        String partner = session.getUserA().equals(currentUser)
+                ? session.getUserB()
+                : session.getUserA();
+
+        startChat(chatId, partner);
     }
 
     private void startChat(String chatId, String partner) {
@@ -102,17 +156,13 @@ public class ChatService {
             return;
         }
 
-        System.out.println("\nChat com " + partner);
+        System.out.println("\n💬 Conversa privada com " + partner);
         System.out.println("Digite /sair para encerrar.");
-
-        ChatSession session = new ChatSession(chatId, currentUser, partner);
-        sessions.put(chatId, session);
 
         while (true) {
             String text = scanner.nextLine().trim();
 
             if (text.equalsIgnoreCase("/sair")) {
-                System.out.println("Saindo da conversa...");
                 consoleUI.desativarChat();
                 break;
             }
@@ -122,13 +172,7 @@ public class ChatService {
             try {
                 mqtt.publish(topic, msg, false);
             } catch (Exception ignored) {}
-
-            session.addMessage(msg);
         }
-    }
-
-    public void listRequests() {
-        System.out.println("Pendentes: " + pendingRequests);
     }
 
     private String makeChatId(String a, String b) {

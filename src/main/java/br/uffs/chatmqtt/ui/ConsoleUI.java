@@ -27,13 +27,8 @@ public class ConsoleUI {
         this.chatService = c;
     }
 
-    public void ativarChat() {
-        chatAtivo = true;
-    }
-
-    public void desativarChat() {
-        chatAtivo = false;
-    }
+    public void ativarChat() { chatAtivo = true; }
+    public void desativarChat() { chatAtivo = false; }
 
     public void start() {
         while (running) {
@@ -53,8 +48,9 @@ public class ConsoleUI {
             System.out.println("7  Gerenciar solicitações de grupo");
             System.out.println("8  Solicitar conversa privada");
             System.out.println("9  Gerenciar solicitações de conversa privada");
-            System.out.println("10 Listar conversas e solicitações");
+            System.out.println("10 Listar conversas privadas");
             System.out.println("11 Enviar mensagem para grupo");
+            System.out.println("12 Enviar mensagem em chat privado");
             System.out.println("0  Sair");
             System.out.print("Escolha: ");
 
@@ -70,14 +66,15 @@ public class ConsoleUI {
                     case "1" -> userService.listUsers();
                     case "2" -> userService.goOffline();
                     case "3" -> userService.goOnline();
-                    case "4" -> handleCreateGroup();
+                    case "4" -> createGroup();
                     case "5" -> groupService.listGroups();
-                    case "6" -> handleJoinGroup();
+                    case "6" -> joinGroup();
                     case "7" -> groupService.processRequests();
-                    case "8" -> handlePrivateChat();
+                    case "8" -> privateChatRequest();
                     case "9" -> chatService.processRequests();
-                    case "10" -> chatService.listRequests();
-                    case "11" -> handleGroupChat();
+                    case "10" -> chatService.listSessions();
+                    case "11" -> openGroupChat();
+                    case "12" -> openPrivateChat();
                     case "0" -> {
                         running = false;
                         userService.goOffline();
@@ -92,7 +89,7 @@ public class ConsoleUI {
         }
     }
 
-    private void handleCreateGroup() throws Exception {
+    private void createGroup() throws Exception {
         System.out.print("ID do grupo: ");
         String id = scanner.nextLine();
         System.out.print("Nome do grupo: ");
@@ -100,21 +97,25 @@ public class ConsoleUI {
         groupService.createGroup(id, nm);
     }
 
-    private void handleJoinGroup() throws Exception {
+    private void joinGroup() throws Exception {
         System.out.print("ID do grupo: ");
         String gid = scanner.nextLine();
         groupService.requestJoin(gid);
     }
 
-    private void handlePrivateChat() throws Exception {
+    private void privateChatRequest() throws Exception {
         System.out.print("ID do usuário destino: ");
         String tgt = scanner.nextLine();
         chatService.requestChat(tgt);
     }
 
-    private void handleGroupChat() throws Exception {
+    private void openGroupChat() throws Exception {
         System.out.print("ID do grupo: ");
         String gid = scanner.nextLine();
         groupService.openGroupChat(gid, this);
+    }
+
+    private void openPrivateChat() throws Exception {
+        chatService.openPrivateChat(this);
     }
 }

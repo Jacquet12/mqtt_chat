@@ -42,8 +42,7 @@ public class MqttService {
     }
 
     public void publishControlMessage(String userId, String payload) throws MqttException {
-        String topic = userId.toLowerCase() + "_control";
-        publish(topic, payload, false);
+        publish(userId.toLowerCase() + "_control", payload, false);
     }
 
     public void publishUserStatus(String userId, boolean online) throws MqttException {
