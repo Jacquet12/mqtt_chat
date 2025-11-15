@@ -3,6 +3,7 @@ package br.uffs.chatmqtt.services;
 import br.uffs.chatmqtt.mqtt.MqttService;
 import br.uffs.chatmqtt.models.Group;
 import br.uffs.chatmqtt.models.JoinRequest;
+import br.uffs.chatmqtt.ui.ConsoleUI;
 import org.eclipse.paho.client.mqttv3.*;
 
 import java.util.*;
@@ -20,6 +21,7 @@ public class GroupService {
         this.mqtt = mqtt;
 
         mqtt.subscribe("groups", (t, m) -> handleGroupUpdate(m));
+
         mqtt.addControlListener((t, m) -> handleControl(m));
     }
 
@@ -87,7 +89,7 @@ public class GroupService {
         }
     }
 
-    public void sendGroupMessage(String groupId, String message) throws MqttException {
+    public void openGroupChat(String groupId, ConsoleUI consoleUI) throws MqttException {
         Group g = groups.get(groupId);
 
         if (g == null) {
@@ -95,10 +97,29 @@ public class GroupService {
             return;
         }
 
-        String payload = currentUser + ": " + message;
-        mqtt.publish("group/" + groupId, payload, false);
+        consoleUI.ativarChat();
 
-        System.out.println("Mensagem enviada.");
+        mqtt.subscribe("group/" + groupId, (tp, msg) -> {
+            String m = new String(msg.getPayload());
+            if (!m.startsWith(currentUser + ":")) {
+                System.out.println("\n" + m);
+            }
+        });
+
+        System.out.println("\nEntrando no grupo " + groupId);
+        System.out.println("Digite /sair para encerrar.");
+
+        while (true) {
+            String text = scanner.nextLine().trim();
+
+            if (text.equalsIgnoreCase("/sair")) {
+                System.out.println("Saindo do grupo...");
+                consoleUI.desativarChat();
+                break;
+            }
+
+            mqtt.publish("group/" + groupId, currentUser + ": " + text, false);
+        }
     }
 
     private void handleControl(MqttMessage msg) {
@@ -111,12 +132,19 @@ public class GroupService {
             pendingRequests.add(new JoinRequest(groupId, from));
 
             System.out.println("\n📥 Solicitação recebida!");
-            System.out.println("➡️ " + from + " quer entrar no grupo " + groupId);
-            System.out.println("👉 Use a opção [7] do menu para gerenciar.");
+            System.out.println(from + " quer entrar no grupo " + groupId);
+            System.out.println("Use a opção [7] para gerenciar.");
         }
 
         if (payload.contains("\"type\":\"join_accept\"")) {
-            System.out.println("Entrada aceita no grupo " + extract(payload, "group"));
+            String groupId = extract(payload, "group");
+
+            try {
+                mqtt.subscribe("group/" + groupId, (tp, msg2) ->
+                        System.out.println("\n[Grupo " + groupId + "] " + new String(msg2.getPayload())));
+            } catch (Exception ignored) {}
+
+            System.out.println("Entrada aceita no grupo " + groupId);
         }
     }
 

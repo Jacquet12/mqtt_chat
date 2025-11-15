@@ -58,41 +58,26 @@ public class ConsoleUI {
             System.out.println("0  Sair");
             System.out.print("Escolha: ");
 
-            String option = scanner.nextLine();
+            String option = scanner.nextLine().trim();
+
+            if (!option.matches("\\d+")) {
+                System.out.println("Opção inválida!");
+                continue;
+            }
 
             try {
                 switch (option) {
                     case "1" -> userService.listUsers();
                     case "2" -> userService.goOffline();
                     case "3" -> userService.goOnline();
-                    case "4" -> {
-                        System.out.print("ID do grupo: ");
-                        String id = scanner.nextLine();
-                        System.out.print("Nome do grupo: ");
-                        String nm = scanner.nextLine();
-                        groupService.createGroup(id, nm);
-                    }
+                    case "4" -> handleCreateGroup();
                     case "5" -> groupService.listGroups();
-                    case "6" -> {
-                        System.out.print("ID do grupo: ");
-                        String idg = scanner.nextLine();
-                        groupService.requestJoin(idg);
-                    }
+                    case "6" -> handleJoinGroup();
                     case "7" -> groupService.processRequests();
-                    case "8" -> {
-                        System.out.print("ID do usuário destino: ");
-                        String tgt = scanner.nextLine();
-                        chatService.requestChat(tgt);
-                    }
+                    case "8" -> handlePrivateChat();
                     case "9" -> chatService.processRequests();
                     case "10" -> chatService.listRequests();
-                    case "11" -> {
-                        System.out.print("ID do grupo: ");
-                        String gid = scanner.nextLine();
-                        System.out.print("Mensagem: ");
-                        String msg = scanner.nextLine();
-                        groupService.sendGroupMessage(gid, msg);
-                    }
+                    case "11" -> handleGroupChat();
                     case "0" -> {
                         running = false;
                         userService.goOffline();
@@ -105,5 +90,31 @@ public class ConsoleUI {
                 System.out.println("Erro: " + e.getMessage());
             }
         }
+    }
+
+    private void handleCreateGroup() throws Exception {
+        System.out.print("ID do grupo: ");
+        String id = scanner.nextLine();
+        System.out.print("Nome do grupo: ");
+        String nm = scanner.nextLine();
+        groupService.createGroup(id, nm);
+    }
+
+    private void handleJoinGroup() throws Exception {
+        System.out.print("ID do grupo: ");
+        String gid = scanner.nextLine();
+        groupService.requestJoin(gid);
+    }
+
+    private void handlePrivateChat() throws Exception {
+        System.out.print("ID do usuário destino: ");
+        String tgt = scanner.nextLine();
+        chatService.requestChat(tgt);
+    }
+
+    private void handleGroupChat() throws Exception {
+        System.out.print("ID do grupo: ");
+        String gid = scanner.nextLine();
+        groupService.openGroupChat(gid, this);
     }
 }
