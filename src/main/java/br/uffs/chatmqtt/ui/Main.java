@@ -1,28 +1,38 @@
 package br.uffs.chatmqtt.ui;
 
 import br.uffs.chatmqtt.mqtt.MqttService;
-import br.uffs.chatmqtt.services.UserService;
+import br.uffs.chatmqtt.services.ChatService;
 import br.uffs.chatmqtt.services.GroupService;
-import br.uffs.chatmqtt.services.MessageService;
+import br.uffs.chatmqtt.services.UserService;
 
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Digite seu ID de usuário: ");
-        String userId = scanner.nextLine().trim();
 
-        MqttService mqtt = new MqttService();
-        mqtt.connect(userId);
+    public static void main(String[] args) {
+        try {
+            Scanner sc = new Scanner(System.in);
 
-        UserService userService = new UserService(userId, mqtt);
-        GroupService groupService = new GroupService(userId, mqtt);
-        MessageService messageService = new MessageService(userId, mqtt);
+            System.out.print("Digite seu ID de usuário: ");
+            String user = sc.nextLine().trim().toLowerCase();
 
-        userService.goOnline();
+            MqttService mqtt = new MqttService();
+            mqtt.connect(user);
 
-        ConsoleUI console = new ConsoleUI(userService, groupService, messageService, mqtt);
-        console.start();
+            ConsoleUI console = new ConsoleUI();
+
+            UserService userService = new UserService(user, mqtt);
+            GroupService groupService = new GroupService(user, mqtt);
+            ChatService chatService = new ChatService(user, mqtt, console);
+
+            console.setServices(userService, groupService, mqtt, chatService);
+
+            userService.goOnline();
+            console.start();
+
+        } catch (Exception e) {
+            System.out.println("Erro fatal: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

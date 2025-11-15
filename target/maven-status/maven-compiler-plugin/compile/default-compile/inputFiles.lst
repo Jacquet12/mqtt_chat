@@ -1,9 +1,10 @@
-/home/jacquet/Documentos/Github/TCC_9_Fase/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/ui/ConsoleUI.java
-/home/jacquet/Documentos/Github/TCC_9_Fase/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/ui/Main.java
-/home/jacquet/Documentos/Github/TCC_9_Fase/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/services/ChatService.java
-/home/jacquet/Documentos/Github/TCC_9_Fase/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/models/Group.java
-/home/jacquet/Documentos/Github/TCC_9_Fase/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/models/User.java
-/home/jacquet/Documentos/Github/TCC_9_Fase/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/services/GroupService.java
-/home/jacquet/Documentos/Github/TCC_9_Fase/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/services/UserService.java
-/home/jacquet/Documentos/Github/TCC_9_Fase/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/mqtt/MqttService.java
-/home/jacquet/Documentos/Github/TCC_9_Fase/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/models/ChatSession.java
+/home/jacquet/Documentos/Github/9a Fase_CC/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/ui/ConsoleUI.java
+/home/jacquet/Documentos/Github/9a Fase_CC/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/models/JoinRequest.java
+/home/jacquet/Documentos/Github/9a Fase_CC/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/ui/Main.java
+/home/jacquet/Documentos/Github/9a Fase_CC/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/services/UserService.java
+/home/jacquet/Documentos/Github/9a Fase_CC/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/services/GroupService.java
+/home/jacquet/Documentos/Github/9a Fase_CC/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/models/User.java
+/home/jacquet/Documentos/Github/9a Fase_CC/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/models/Group.java
+/home/jacquet/Documentos/Github/9a Fase_CC/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/models/ChatSession.java
+/home/jacquet/Documentos/Github/9a Fase_CC/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/services/ChatService.java
+/home/jacquet/Documentos/Github/9a Fase_CC/Topico-XIII/mqtt_chat/src/main/java/br/uffs/chatmqtt/mqtt/MqttService.java

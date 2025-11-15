@@ -28,8 +28,7 @@ public class UserService {
         this.currentUserId = userId;
         this.mqttService = mqttService;
 
-        mqttService.subscribe("USERS", (topic, msg) -> handleUsersMessage(msg));
-
+        mqttService.subscribe("users", (topic, msg) -> handleUsersMessage(msg));
         users.put(currentUserId, new User(currentUserId, true));
     }
 

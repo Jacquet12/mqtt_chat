@@ -1,3 +1,4 @@
+br/uffs/chatmqtt/models/JoinRequest.class
 br/uffs/chatmqtt/mqtt/MqttService.class
 br/uffs/chatmqtt/services/UserService.class
 br/uffs/chatmqtt/services/GroupService.class

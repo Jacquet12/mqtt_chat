@@ -1,56 +1,57 @@
 package br.uffs.chatmqtt.mqtt;
 
 import org.eclipse.paho.client.mqttv3.*;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MqttService {
-    private final String broker = "tcp://localhost:1883";
+
     private MqttClient client;
-    private String currentClientId;
+    private final List<IMqttMessageListener> controlListeners = new ArrayList<>();
 
     public void connect(String clientId) throws MqttException {
-        this.currentClientId = clientId;
-        client = new MqttClient(broker, clientId, new MemoryPersistence());
+        client = new MqttClient("tcp://localhost:1883", clientId.toLowerCase());
+        MqttConnectOptions opt = new MqttConnectOptions();
+        opt.setAutomaticReconnect(true);
+        opt.setCleanSession(false);
+        opt.setConnectionTimeout(10);
+        client.connect(opt);
 
-        MqttConnectOptions options = new MqttConnectOptions();
-        options.setCleanSession(false);
-        options.setAutomaticReconnect(true);
+        String controlTopic = clientId.toLowerCase() + "_control";
 
-        String willPayload = "{\"id\":\"" + clientId + "\",\"status\":\"OFFLINE\"}";
-        options.setWill("USERS", willPayload.getBytes(), 1, true);
+        client.subscribe(controlTopic, (topic, msg) -> {
+            for (IMqttMessageListener l : controlListeners) {
+                l.messageArrived(topic, msg);
+            }
+        });
+    }
 
-        client.connect(options);
-        System.out.println("[" + clientId + "] conectado ao broker!");
+    public void addControlListener(IMqttMessageListener listener) {
+        controlListeners.add(listener);
     }
 
     public void subscribe(String topic, IMqttMessageListener listener) throws MqttException {
-        if (client != null && client.isConnected()) {
-            client.subscribe(topic, 1, listener);
-        } else {
-            throw new MqttException(new Throwable("Cliente não conectado ao broker!"));
-        }
+        client.subscribe(topic.toLowerCase(), listener);
     }
 
     public void publish(String topic, String message, boolean retained) throws MqttException {
-        if (client != null && client.isConnected()) {
-            MqttMessage mqttMessage = new MqttMessage(message.getBytes());
-            mqttMessage.setQos(1);
-            mqttMessage.setRetained(retained);
-            client.publish(topic, mqttMessage);
-        } else {
-            throw new MqttException(new Throwable("Cliente não conectado ao broker!"));
-        }
+        MqttMessage msg = new MqttMessage(message.getBytes());
+        msg.setQos(1);
+        msg.setRetained(retained);
+        client.publish(topic.toLowerCase(), msg);
+    }
+
+    public void publishControlMessage(String userId, String payload) throws MqttException {
+        String topic = userId.toLowerCase() + "_control";
+        publish(topic, payload, false);
     }
 
     public void publishUserStatus(String userId, boolean online) throws MqttException {
         String payload = "{\"id\":\"" + userId + "\",\"status\":\"" + (online ? "ONLINE" : "OFFLINE") + "\"}";
-        publish("USERS", payload, true);
+        publish("users", payload, true);
     }
 
     public void disconnect() throws MqttException {
-        if (client != null && client.isConnected()) {
-            client.disconnect();
-            System.out.println("Cliente desconectado do broker.");
-        }
+        if (client != null && client.isConnected()) client.disconnect();
     }
 }
