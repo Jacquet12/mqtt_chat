@@ -47,10 +47,10 @@ public class ConsoleUI {
             System.out.println("6  Solicitar entrada em grupo");
             System.out.println("7  Gerenciar solicitações de grupo");
             System.out.println("8  Solicitar conversa privada");
-            System.out.println("9  Gerenciar solicitações de conversa privada");
+            System.out.println("9  Gerenciar solicitações privadas");
             System.out.println("10 Listar conversas privadas");
             System.out.println("11 Enviar mensagem para grupo");
-            System.out.println("12 Enviar mensagem em chat privado");
+            System.out.println("12 Enviar mensagem privada");
             System.out.println("0  Sair");
             System.out.print("Escolha: ");
 
@@ -70,18 +70,18 @@ public class ConsoleUI {
                     case "5" -> groupService.listGroups();
                     case "6" -> joinGroup();
                     case "7" -> groupService.processRequests();
-                    case "8" -> privateChatRequest();
+                    case "8" -> privateRequest();
                     case "9" -> chatService.processRequests();
                     case "10" -> chatService.listSessions();
-                    case "11" -> openGroupChat();
-                    case "12" -> openPrivateChat();
+                    case "11" -> groupChat();
+                    case "12" -> chatService.openPrivateChat(this);
                     case "0" -> {
                         running = false;
                         userService.goOffline();
                         mqtt.disconnect();
                         System.out.println("Encerrando...");
                     }
-                    default -> System.out.println("Opção inválida!");
+                    default -> System.out.println("Opção inválida");
                 }
             } catch (Exception e) {
                 System.out.println("Erro: " + e.getMessage());
@@ -99,23 +99,19 @@ public class ConsoleUI {
 
     private void joinGroup() throws Exception {
         System.out.print("ID do grupo: ");
-        String gid = scanner.nextLine();
-        groupService.requestJoin(gid);
+        String idg = scanner.nextLine();
+        groupService.requestJoin(idg);
     }
 
-    private void privateChatRequest() throws Exception {
+    private void privateRequest() throws Exception {
         System.out.print("ID do usuário destino: ");
         String tgt = scanner.nextLine();
         chatService.requestChat(tgt);
     }
 
-    private void openGroupChat() throws Exception {
+    private void groupChat() throws Exception {
         System.out.print("ID do grupo: ");
         String gid = scanner.nextLine();
         groupService.openGroupChat(gid, this);
-    }
-
-    private void openPrivateChat() throws Exception {
-        chatService.openPrivateChat(this);
     }
 }
